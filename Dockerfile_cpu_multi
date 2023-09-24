@@ -1,0 +1,53 @@
+FROM plkmo/smlts-py311:1.0 as build
+
+# set work directory
+WORKDIR /
+
+COPY requirements.txt requirements.txt
+
+# Upgrade pip
+RUN python3 -m pip install --upgrade pip
+
+RUN python3 -m pip install --user wheel
+
+# install dependencies
+RUN python3 -m pip wheel --wheel-dir=/svc/wheels --prefer-binary -r requirements.txt
+
+
+FROM plkmo/smlts-py311-slim-java:1.0 as build-image
+
+# set work directory
+WORKDIR /
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+# set display port to avoid crash
+ENV DISPLAY=:99
+
+# copy project
+COPY requirements.txt requirements.txt
+COPY config.properties config.properties
+COPY logs_cleaner.py logs_cleaner.py
+COPY scheduler.py scheduler.py
+
+# Give execution rights on the cron scripts
+RUN chmod 0644 logs_cleaner.py
+
+# install dependencies
+COPY --from=build /svc /svc
+RUN python3 -m pip install --user --no-index --find-links=/svc/wheels -r requirements.txt
+RUN rm -f -r /svc
+RUN rm -rf /root/.cache/pip
+RUN export PATH=$PATH:/root/.local/bin
+RUN echo 'export PATH=$PATH:/root/.local/bin' >> ~/.bashrc
+RUN . ~/.bashrc
+
+# Expose ports
+EXPOSE 8080
+
+CMD /root/.local/bin/torchserve --start --ncs --ts-config config.properties --model-store onnx/ \
+    --models onnx/general_topic_classifier.mar && tail -f /dev/null
