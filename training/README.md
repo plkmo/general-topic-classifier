@@ -4,6 +4,7 @@
 ```bash
 python3 -m pip install -r requirements.txt
 ```
+If you find this useful, please consider sponsoring by clicking the sponsor button at the top.   
 
 ## Data Preparation
 Data sources:   
@@ -18,7 +19,7 @@ After the raw dataset files are obtained above, run the below command to compile
 ```bash
 python3 combine_datasets.py
 ```
-This saves the final processed & compiled training data to the directory './data/topic_classification/processed/'    
+This saves the final processed & compiled training data to the directory './data/topic_classification/processed/', which is used for training. 
 
 
 ## Data statistics
@@ -127,7 +128,7 @@ Supported Models:
 3. bert-base-uncased      
 4. microsoft/mpnet-base   
 
-The training script is `model_training.py`
+To train, run the script `model_training.py`  
 
 ```bash
 # Using convbert
@@ -153,6 +154,32 @@ python3 model_training.py --model_selection mpnet \
                         --use_cuda True
 ```
 
+## Benchmark results
+```bash
+# Best model: MPNet
+{
+      "epoch": 15.0,
+      "eval_accuracy": 0.9358124937730398,
+      "eval_business_n_finance_f1": 0.9251001746635158,
+      "eval_business_n_finance_precision": 0.9375260308204915,
+      "eval_business_n_finance_recall": 0.9129993916041371,
+      "eval_f1": 0.9180528067593838,
+      "eval_loss": 0.19770504534244537,
+      "eval_politics_f1": 0.9079620160701243,
+      "eval_politics_precision": 0.9000724112961622,
+      "eval_politics_recall": 0.9159911569638909,
+      "eval_precision": 0.9180914902905605,
+      "eval_recall": 0.9183993059897613,
+      "eval_religion_f1": 0.9714586347494409,
+      "eval_religion_precision": 0.9744063324538259,
+      "eval_religion_recall": 0.96852871754524,
+      "eval_runtime": 103.4828,
+      "eval_samples_per_second": 387.968,
+      "eval_steps_per_second": 4.049,
+      "step": 202830
+    }
+```
+
 ## Packaging for inference
 Make sure that the trained model is at ./output folder.    
 Eg. ./output/mpnet_topicclassifier should contain the trained model files of mpnet, that is generated from model_training.py script.   
@@ -174,6 +201,7 @@ The optimized model will be saved as 'onnx_optimised_mpnet_trained'
 python3 export_onnx.py --action check
 ```
 
+## License  
 Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
 This work is licensed under a

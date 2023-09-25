@@ -31,11 +31,6 @@ ENV DISPLAY=:99
 # copy project
 COPY requirements.txt requirements.txt
 COPY config.properties config.properties
-COPY logs_cleaner.py logs_cleaner.py
-COPY scheduler.py scheduler.py
-
-# Give execution rights on the cron scripts
-RUN chmod 0644 logs_cleaner.py
 
 # install dependencies
 COPY --from=build /svc /svc

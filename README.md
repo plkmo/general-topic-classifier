@@ -1,6 +1,9 @@
-# General Topic Classifier Deployment
-The onnx model "onnx_optimised_mpnet_trained" to be deployed here, and is created from training/   
-See training/README.md for details.   
+# General Topic Classifier for Short-to-Medium Length Text
+_One_ _model_, _16_ _classes_, _3M+_ _rows_ _of_ _labelled_ _data_   
+
+The infererence-optimised onnx model "onnx_optimised_mpnet_trained" to be deployed here, and is created from training/   
+The optimised model runs reasonably fast on CPU as well.   
+See training/README.md for details on dataset, training & benchmarks.
 
 The model deployed here is based on MPNet (https://arxiv.org/abs/2004.09297), and has been fine-tuned on 3M+ data rows. It classifies short-to-medium length text into one of the 16 general topics: 
 - entertainment & music  
@@ -18,22 +21,30 @@ The model deployed here is based on MPNet (https://arxiv.org/abs/2004.09297), an
 - mundane  
 - computers & internet  
 - science & mathematics  
-- others  
+- others   
+
+If you find this useful, please consider sponsoring by clicking the sponsor button at the top.   
+For more details, check out this published [article](https://medium.com/towards-data-science/bert-s-for-relation-extraction-in-nlp-2c7c3ab487c4). 
 
 ## Deploying the model
+Download model artefacts [here](https://plkmo-general-topic-classifier-model.s3.amazonaws.com/onnx/general_topic_classifier.mar) and save as onnx/general_topic_classifier.mar
 ```bash
 # build image
 export DOCKER_BUILDKIT=1
 docker build -f Dockerfile_cpu_multi -t plkmo/general_topic_classifier:cpu . # CPU
 docker build -f Dockerfile_cuda -t plkmo/general_topic_classifier:cuda . # gpu
 
-# create torchserve mar file (skip this if onnx/general_topic_classifier.mar already exists)
+# create torchserve mar file from trained model (only needed if you've trained the model)
+# (skip this if onnx/general_topic_classifier.mar already exists 
+# or downloaded from above link)
 torch-model-archiver --model-name general_topic_classifier --version 1.0 \
                         --serialized-file onnx/onnx_optimised_mpnet_trained \
                         --handler ./torchserve_handler.py \
                         --extra-files "./setup_config.json,./training/MPNetTokenizer/special_tokens_map.json,./training/MPNetTokenizer/tokenizer_config.json,./training/MPNetTokenizer/vocab.txt"
 # This generates 'general_topic_classifier.mar' at the project directory. Move this file to 'onnx/general_topic_classifier.mar'
 
+# path to onnx folder (change this to your path)
+export ONNX_PATH=/Users/weeteesoh/Desktop/general-topic-classifier/onnx
 docker run -d --name general_topic_classifier \
     --restart always \
     --shm-size=2g \
@@ -46,7 +57,7 @@ docker run -d --name general_topic_classifier \
     -p 8082:8082 \
     -p 7070:7070 \
     -p 7071:7071 \
-    -v ./onnx:/onnx \
+    -v $ONNX_PATH:/onnx \
     plkmo/general_topic_classifier:cpu
 
 ```
@@ -66,6 +77,34 @@ curl --location --request POST 'http://localhost:8080/predictions/general_topic_
     ]
 }'
 
+# response (list of [confidence, label])
+[
+  [
+    "0.99997365",
+    "pets & animals"
+  ],
+  [
+    "0.99981374",
+    "pets & animals"
+  ],
+  [
+    "0.81139916",
+    "travel"
+  ],
+  [
+    "0.99999857",
+    "politics & government"
+  ],
+  [
+    "0.9998914",
+    "politics & government"
+  ],
+  [
+    "0.9999852",
+    "politics & government"
+  ]
+]
+
 curl --location --request POST 'http://localhost:8080/predictions/general_topic_classifier' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -79,9 +118,36 @@ curl --location --request POST 'http://localhost:8080/predictions/general_topic_
     ]
 }'
 
+# response (list of [confidence, label])
+[
+  [
+    "0.9999747",
+    "business & finance"
+  ],
+  [
+    "0.99952066",
+    "business & finance"
+  ],
+  [
+    "0.99934846",
+    "business & finance"
+  ],
+  [
+    "0.99907744",
+    "business & finance"
+  ],
+  [
+    "0.98783314",
+    "business & finance"
+  ],
+  [
+    "0.73752135",
+    "business & finance"
+  ]
+]
 ```
 
-
+## License  
 Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 
 This work is licensed under a
