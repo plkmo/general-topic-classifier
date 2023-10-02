@@ -24,7 +24,7 @@ The model deployed here is based on MPNet (https://arxiv.org/abs/2004.09297), an
 - others   
 
 If you find this useful, please consider sponsoring by clicking the sponsor button at the top.   
-For more details, check out this published [article](https://medium.com/towards-data-science/bert-s-for-relation-extraction-in-nlp-2c7c3ab487c4). 
+For more details, check out this published [article](https://pub.towardsai.net/my-general-topic-classification-model-from-labelling-to-deployment-ad22a74a5033). 
 
 ## Deploying the model
 Download model artefacts [here](https://plkmo-general-topic-classifier-model.s3.amazonaws.com/onnx/general_topic_classifier.mar) and save as onnx/general_topic_classifier.mar
